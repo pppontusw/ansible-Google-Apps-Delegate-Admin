@@ -1,8 +1,8 @@
-# Google Apps Group Sync installation
+# Google Apps Delegate Admin installation
 
 ## What does it do?
 
-1. Installs Google Apps Group Sync and all dependencies to /opt/
+1. Installs Google Apps Delegate Admin and all dependencies to /opt/
 2. Sets up Apache2 with mod_wsgi to run the web server
 
 ## What do you have to do?
