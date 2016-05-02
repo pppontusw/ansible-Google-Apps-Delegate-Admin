@@ -1,0 +1,7 @@
+import sys
+sys.path.insert(0, '{{install_path}}')
+from run import app as application
+import uuid
+application.config['WTF_CSRF_ENABLED'] = True
+application.secret_key = str(uuid.uuid4())
+application.debug = False

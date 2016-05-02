@@ -1,0 +1,82 @@
+- name: include OS-specific variables
+  include_vars: "{{ ansible_os_family }}.yml"
+
+- include: "{{ ansible_os_family }}.yml"
+  become: yes
+
+- name: pip install
+  pip: name={{item}}
+  with_items:
+    - flask
+    - flask-wtf
+    - xmltodict
+    - httplib2
+    - oauth2client
+  become: yes
+
+- name: create {{gapps_delegate_admin_group}} group
+  group: name={{gapps_delegate_admin_group}} state=present
+  become: yes
+
+- name: create {{gapps_delegate_admin_user}} user
+  user: name={{gapps_delegate_admin_user}} groups={{gapps_delegate_admin_group}} state=present
+  become: yes
+
+- name: create application folder
+  file: 
+    path: '{{install_path}}'
+    state: directory
+    owner: "{{gapps_delegate_admin_user}}"
+    group: "{{gapps_delegate_admin_group}}"
+    mode: 0755
+    setype: httpd_config_t
+  become: yes
+
+- name: git clone
+  git: repo=https://github.com/pppontusw/Google-Apps-Delegate-Admin.git dest={{install_path}}
+
+- name: Copy client secret
+  copy: 
+    content: "{{gapps_delegate_client_secret_json}}" 
+    dest: "{{install_path}}/client_secrets.json"
+    setype: httpd_config_t
+
+- name: copy configs
+  template:
+    src: "../templates/{{item}}.j2"
+    dest: "{{install_path}}/{{item}}"
+    owner: "{{gapps_delegate_admin_user}}"
+    group: "{{gapps_delegate_admin_group}}"
+    mode: 0644
+    setype: httpd_config_t
+  with_items: 
+    - delegateadmin.wsgi
+  notify:
+    - restart apache
+
+- name: copy vhost
+  template:
+    src: "../templates/{{item}}.j2"
+    dest: "{{apache_vhost_path}}{{item}}"
+    owner: "{{gapps_delegate_admin_user}}"
+    group: "{{gapps_delegate_admin_group}}"
+    mode: 0644
+    setype: httpd_config_t
+  with_items: 
+    - delegateadmin.conf
+  notify:
+    - restart apache
+
+- name: create symlinks
+  file: 
+    src: "/etc/apache2/sites-available/{{ item }}" 
+    dest: "/etc/apache2/sites-enabled/{{ item }}" 
+    state: link
+    owner: "{{gapps_delegate_admin_user}}"
+    group: "{{gapps_delegate_admin_group}}"
+    mode: 0644
+  with_items: 
+    - delegateadmin.conf
+  when: ansible_os_family == 'Debian'
+  notify:
+    - restart apache

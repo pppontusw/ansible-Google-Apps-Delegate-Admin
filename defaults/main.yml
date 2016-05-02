@@ -1,0 +1,5 @@
+install_path: /opt/gapps-delegate-admin
+gapps_delegate_client_secret_json: 'jsonhere'
+server_name: 'delegateadmin'
+gapps_delegate_admin_user: 'www-data'
+gapps_delegate_admin_group: 'www-data'

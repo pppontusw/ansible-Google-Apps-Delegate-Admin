@@ -1,0 +1,13 @@
+<VirtualHost *:80>
+    ServerName {{server_name}}
+
+    WSGIDaemonProcess gappsdelegateadmin user={{gapps_delegate_admin_user}} group={{gapps_delegate_admin_group}} home={{install_path}} threads=5
+    WSGIScriptAlias / {{install_path}}/delegateadmin.wsgi
+
+    <Directory {{install_path}}>
+        WSGIProcessGroup gappsdelegateadmin
+        WSGIApplicationGroup %{GLOBAL}
+        Order deny,allow
+        Require all granted
+    </Directory>
+</VirtualHost>

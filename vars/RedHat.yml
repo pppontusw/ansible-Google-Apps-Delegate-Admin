@@ -1,0 +1,2 @@
+apache_process_name: httpd
+apache_vhost_path: /etc/httpd/conf.d/
